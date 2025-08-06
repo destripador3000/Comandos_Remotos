@@ -1,3 +1,5 @@
+package main
+
 import (
 	"bufio"
 	"fmt"
@@ -6,7 +8,12 @@ import (
 	"strings"
 )
 
-func (s *Server) handleConnection(conn net.Conn) {
+const (
+	PORT               = ":8080"
+	DISCONNECT_MESSAGE = "!DESCONECTAR"
+)
+
+func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	fmt.Printf("[NUEVA CONEXIÓN] %s conectado.\n", conn.RemoteAddr().String())
 
@@ -30,10 +37,29 @@ func (s *Server) handleConnection(conn net.Conn) {
 			response += "\n[ERROR] " + err.Error()
 		}
 
-		// Enviar la respuesta al cliente
+		// Enviar la respuesta
 		response += "\n"
 		conn.Write([]byte(response))
 	}
 
 	fmt.Printf("[DESCONECTADO] %s desconectado.\n", conn.RemoteAddr().String())
+}
+
+func main() {
+	fmt.Println("[INICIANDO] Servidor Go escuchando en el puerto", PORT)
+	ln, err := net.Listen("tcp", PORT)
+	if err != nil {
+		fmt.Println("[ERROR] No se pudo iniciar el servidor:", err)
+		return
+	}
+	defer ln.Close()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			fmt.Println("[ERROR] Conexión fallida:", err)
+			continue
+		}
+		go handleConnection(conn)
+	}
 }
