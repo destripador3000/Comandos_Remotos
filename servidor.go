@@ -30,14 +30,14 @@ func handleConnection(conn net.Conn) {
 
 		fmt.Printf("[COMANDO] %s: %s\n", conn.RemoteAddr().String(), cmdStr)
 
-		// Ejecutar el comando
+		//Ejecutar comandos; este solo funciona con linux
 		out, err := exec.Command("bash", "-c", cmdStr).CombinedOutput()
 		response := string(out)
 		if err != nil {
 			response += "\n[ERROR] " + err.Error()
 		}
 
-		// Enviar la respuesta
+		
 		response += "\n"
 		conn.Write([]byte(response))
 	}
